@@ -15,6 +15,7 @@ require (
 	github.com/compose-spec/compose-go v1.0.3
 	github.com/containerd/containerd v1.5.8 // indirect
 	github.com/containous/alice v0.0.0-20181107144136-d83ebdd94cbd
+	github.com/containous/go-bindata v1.0.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
 	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/cli v20.10.11+incompatible

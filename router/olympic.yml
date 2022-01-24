@@ -1,0 +1,23 @@
+http:
+  routers:
+    # Define a connection between requests and services
+    to-olympic:
+      rule: "Host(`localhost`) && PathPrefix(`/olympic/api/search`)"
+      # If the rule matches, forward to the whoami service (declared below)
+      service: olympic
+#      middlewares:
+#        - test-user
+
+  middlewares:
+    # Define an authentication mechanism
+    test-user:
+      basicAuth:
+        users:
+          - test:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/
+
+  services:
+    # Define how to reach an existing service on our infrastructure
+    olympic:
+      loadBalancer:
+        servers:
+          - url: http://10.138.36.189:8202/

@@ -1,0 +1,29 @@
+################################################################
+#
+# Configuration sample for Traefik v2.
+#
+# For Traefik v1: https://github.com/traefik/traefik/blob/v1.7/traefik.sample.toml
+#
+################################################################
+
+################################################################
+# Global configuration
+################################################################
+api:
+  dashboard: true
+  insecure: true
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: true
+
+# http routing section
+entryPoints:
+  http:
+    address: ":80"
+  traefik:
+    address: ":8080"
+
+providers:
+  # Enable the file provider to define routers / middlewares / services in file
+  file:
+    directory: "/Users/wangdehong/go/src/traefik/router"
