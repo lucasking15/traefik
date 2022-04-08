@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/traefik/traefik/v2/pkg/middlewares/ws"
 	"net/http"
 	"strings"
 
@@ -357,6 +358,15 @@ func (b *Builder) buildConstructor(ctx context.Context, middlewareName string) (
 
 		middleware = func(next http.Handler) (http.Handler, error) {
 			return plug(ctx, next)
+		}
+	}
+
+	if config.Ws != nil {
+		if middleware != nil {
+			return nil, badConf
+		}
+		middleware = func(next http.Handler) (http.Handler, error) {
+			return ws.New(ctx, next, *config.Ws, middlewareName)
 		}
 	}
 

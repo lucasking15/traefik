@@ -1,12 +1,13 @@
 http:
   routers:
     # Define a connection between requests and services
-    to-olympic:
-      rule: "Host(`localhost`) && PathPrefix(`/olympic/api/search`)"
+    to-study:
+      rule: "Host(`127.0.0.1`) && PathPrefix(`/`)"
       # If the rule matches, forward to the whoami service (declared below)
-      service: olympic
-#      middlewares:
+      service: study
+      middlewares:
 #        - test-user
+        - test-ws
 
   middlewares:
     # Define an authentication mechanism
@@ -14,10 +15,13 @@ http:
       basicAuth:
         users:
           - test:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/
+    test-ws:
+      ws:
+        name: "test"
 
   services:
     # Define how to reach an existing service on our infrastructure
-    olympic:
+    study:
       loadBalancer:
         servers:
-          - url: http://10.138.36.189:8202/
+          - url: http://127.0.0.1:8000/

@@ -94,6 +94,7 @@ func (m *Manager) BuildHTTP(rootCtx context.Context, serviceName string) (http.H
 
 	var lb http.Handler
 
+	// 设置负载均衡器
 	switch {
 	case conf.LoadBalancer != nil:
 		var err error

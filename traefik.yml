@@ -21,7 +21,7 @@ entryPoints:
   http:
     address: ":80"
   traefik:
-    address: ":8080"
+    address: ":8181"
 
 providers:
   # Enable the file provider to define routers / middlewares / services in file
