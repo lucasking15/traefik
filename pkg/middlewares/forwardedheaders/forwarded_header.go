@@ -163,6 +163,7 @@ func (x *XForwarded) rewrite(outreq *http.Request) {
 
 // ServeHTTP implements http.Handler
 func (x *XForwarded) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// 安全模式下会删除x开头的
 	if !x.insecure && !x.isTrustedIP(r.RemoteAddr) {
 		for _, h := range xHeaders {
 			r.Header.Del(h)

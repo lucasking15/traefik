@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"github.com/google/go-cmp/cmp"
 	"reflect"
 	"time"
 
@@ -143,7 +144,9 @@ func (c *ConfigurationWatcher) loadMessage(configMsg dynamic.Message) {
 
 	c.currentConfigurations.Set(newConfigurations)
 
-	conf := mergeConfiguration(newConfigurations, c.defaultEntryPoints)
+	// why???????????????????
+	forMergeConfig := newConfigurations.DeepCopy()
+	conf := mergeConfiguration(forMergeConfig, c.defaultEntryPoints)
 	conf = applyModel(conf)
 
 	for _, listener := range c.configurationListeners {
@@ -164,20 +167,16 @@ func (c *ConfigurationWatcher) preLoadConfiguration(configMsg dynamic.Message) {
 				copyConf.TLS.Stores[k] = st
 			}
 		}
-
-		jsonConf, err := json.Marshal(copyConf)
-		if err != nil {
-			logger.Errorf("Could not marshal dynamic configuration: %v", err)
-			logger.Debugf("Configuration received from provider %s: [struct] %#v", configMsg.ProviderName, copyConf)
-		} else {
-			logger.Debugf("Configuration received from provider %s: %s", configMsg.ProviderName, string(jsonConf))
-		}
+		logger.Debugf("Configuration received from provider %s: %s", configMsg.ProviderName, cmp.Diff(nil, copyConf))
 	}
 
 	if isEmptyConfiguration(configMsg.Configuration) {
 		logger.Infof("Skipping empty Configuration for provider %s", configMsg.ProviderName)
 		return
 	}
+
+	currentConfigurations := c.currentConfigurations.Get().(dynamic.Configurations)
+	logger.Infof("provider %s config diff %s", configMsg.ProviderName, cmp.Diff(currentConfigurations[configMsg.ProviderName], configMsg.Configuration))
 
 	providerConfigUpdateCh, ok := c.providerConfigUpdateMap[configMsg.ProviderName]
 	if !ok {

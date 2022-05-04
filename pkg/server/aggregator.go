@@ -133,6 +133,8 @@ func applyModel(cfg dynamic.Configuration) dynamic.Configuration {
 
 				cp.EntryPoints = []string{epName}
 
+				// 如果endpoint配置了tls，
+				// 那么其所有router都将设置相同tls配置
 				if cp.TLS == nil {
 					cp.TLS = m.TLS
 				}

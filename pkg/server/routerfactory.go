@@ -71,6 +71,7 @@ func (f *RouterFactory) CreateRouters(conf dynamic.Configuration) (map[string]*t
 
 	routerManager := router.NewManager(rtConf, serviceManager, middlewaresBuilder, responseModifierFactory, f.chainBuilder)
 
+	// 注意，TLS和非TLS是两个handler
 	handlersNonTLS := routerManager.BuildHandlers(ctx, f.entryPointsTCP, false)
 	handlersTLS := routerManager.BuildHandlers(ctx, f.entryPointsTCP, true)
 

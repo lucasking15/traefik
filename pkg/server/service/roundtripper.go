@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"github.com/containous/traefik/v2/pkg/jsong"
 	"net"
 	"net/http"
 	"time"
@@ -52,14 +53,18 @@ func createRoundtripper(transportConfiguration *static.ServersTransport) (http.R
 		ExpectContinueTimeout: 1 * time.Second,
 	}
 
-	transport.RegisterProtocol("h2c", &h2cTransportWrapper{
+	h2cTransport := &h2cTransportWrapper{
 		Transport: &http2.Transport{
 			DialTLS: func(netw, addr string, cfg *tls.Config) (net.Conn, error) {
 				return net.Dial(netw, addr)
 			},
 			AllowHTTP: true,
 		},
-	})
+	}
+	transport.RegisterProtocol("h2c", h2cTransport)
+	transport.RegisterProtocol("grpc", h2cTransport)
+
+	transport.RegisterProtocol("jsong", jsong.NewRoundTripper())
 
 	if transportConfiguration.ForwardingTimeouts != nil {
 		transport.ResponseHeaderTimeout = time.Duration(transportConfiguration.ForwardingTimeouts.ResponseHeaderTimeout)

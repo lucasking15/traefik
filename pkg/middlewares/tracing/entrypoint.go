@@ -2,6 +2,7 @@ package tracing
 
 import (
 	"context"
+	"github.com/containous/traefik/v2/pkg/middlewares/accesslog"
 	"net/http"
 
 	"github.com/containous/alice"
@@ -47,6 +48,14 @@ func (e *entryPointMiddleware) ServeHTTP(rw http.ResponseWriter, req *http.Reque
 	tracing.LogRequest(span, req)
 
 	req = req.WithContext(tracing.WithTracing(req.Context(), e.Tracing))
+	ctx := tracing.WithTracing(req.Context(), e.Tracing)
+	req = req.WithContext(ctx)
+
+	logData, _ := ctx.Value(accesslog.DataTableKey).(*accesslog.LogData)
+	if logData != nil && logData.Core != nil {
+		//logData.Core[accesslog.TraceID] = xtrace.TraceIdFromContext(ctx)
+		logData.Core[accesslog.TraceID] = "88888888"
+	}
 
 	recorder := newStatusCodeRecoder(rw, http.StatusOK)
 	e.next.ServeHTTP(recorder, req)

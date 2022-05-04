@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/containous/traefik/v2/pkg/jsong"
 	stdlog "log"
 	"net/http"
 	"os"
@@ -254,6 +255,8 @@ func setupServer(staticConfiguration *static.Configuration) (*server.Server, err
 			}
 		}
 	})
+
+	watcher.AddListener(jsong.LoadGRPCReflection)
 
 	return server.NewServer(routinesPool, serverEntryPointsTCP, serverEntryPointsUDP, watcher, chainBuilder, accessLog), nil
 }

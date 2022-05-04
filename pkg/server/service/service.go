@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	wsjsongmiddleware "github.com/containous/traefik/v2/pkg/middlewares/wsjsong"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/containous/alice"
@@ -88,6 +90,7 @@ func (m *Manager) BuildHTTP(rootCtx context.Context, serviceName string, respons
 
 	var lb http.Handler
 
+	// 设置负载均衡器
 	switch {
 	case conf.LoadBalancer != nil:
 		var err error
@@ -186,7 +189,16 @@ func (m *Manager) getLoadBalancerServiceHandler(
 		chain = chain.Append(metricsMiddle.WrapServiceHandler(ctx, m.metricsRegistry, serviceName))
 	}
 
-	handler, err := chain.Append(alHandler).Then(pipelining.New(ctx, fwd, "pipelining"))
+	cons := make([]alice.Constructor, 0)
+	cons = append(cons, alHandler)
+	// 增加websocket拦截器
+	if strings.Contains(serviceName, "ws") {
+		cons = append(cons, func(handler http.Handler) (http.Handler, error) {
+			return wsjsongmiddleware.NewEntryPointMiddleware(ctx, handler), nil
+		})
+	}
+
+	handler, err := chain.Append(cons...).Then(pipelining.New(ctx, fwd, "pipelining"))
 	if err != nil {
 		return nil, err
 	}

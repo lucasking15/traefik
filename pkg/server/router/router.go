@@ -3,8 +3,6 @@ package router
 import (
 	"context"
 	"errors"
-	"net/http"
-
 	"github.com/containous/alice"
 	"github.com/containous/traefik/v2/pkg/config/runtime"
 	"github.com/containous/traefik/v2/pkg/log"
@@ -14,6 +12,7 @@ import (
 	"github.com/containous/traefik/v2/pkg/rules"
 	"github.com/containous/traefik/v2/pkg/server/middleware"
 	"github.com/containous/traefik/v2/pkg/server/provider"
+	"net/http"
 )
 
 const (
@@ -71,17 +70,22 @@ func (m *Manager) getHTTPRouters(ctx context.Context, entryPoints []string, tls 
 // BuildHandlers Builds handler for all entry points
 func (m *Manager) BuildHandlers(rootCtx context.Context, entryPoints []string, tls bool) map[string]http.Handler {
 	entryPointHandlers := make(map[string]http.Handler)
+	httpRouters := m.getHTTPRouters(rootCtx, entryPoints, tls)
+	if _, ok := httpRouters["http"]; !ok {
+		httpRouters["http"] = nil
+	}
 
-	for entryPointName, routers := range m.getHTTPRouters(rootCtx, entryPoints, tls) {
+	for entryPointName, routers := range httpRouters {
 		entryPointName := entryPointName
 		ctx := log.With(rootCtx, log.Str(log.EntryPointName, entryPointName))
 
-		handler, err := m.buildEntryPointHandler(ctx, routers)
+		handler, err := m.buildEntryPointHandler(ctx, entryPointName, routers)
 		if err != nil {
 			log.FromContext(ctx).Error(err)
 			continue
 		}
 
+		// entrypoint级别的middleware
 		handlerWithAccessLog, err := alice.New(func(next http.Handler) (http.Handler, error) {
 			return accesslog.NewFieldHandler(next, log.EntryPointName, entryPointName, accesslog.AddOriginFields), nil
 		}).Then(handler)
@@ -112,7 +116,14 @@ func (m *Manager) BuildHandlers(rootCtx context.Context, entryPoints []string, t
 	return entryPointHandlers
 }
 
-func (m *Manager) buildEntryPointHandler(ctx context.Context, configs map[string]*runtime.RouterInfo) (http.Handler, error) {
+func addLoginStudy(router *rules.Router) {
+	router.Methods(http.MethodGet).PathPrefix("/study/").HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Write([]byte("Gorilla!\n"))
+		return
+	})
+}
+
+func (m *Manager) buildEntryPointHandler(ctx context.Context, entryPointName string, configs map[string]*runtime.RouterInfo) (http.Handler, error) {
 	router, err := rules.NewRouter()
 	if err != nil {
 		return nil, err
@@ -135,6 +146,10 @@ func (m *Manager) buildEntryPointHandler(ctx context.Context, configs map[string
 			logger.Error(err)
 			continue
 		}
+	}
+
+	if entryPointName == "http" {
+		addLoginStudy(router)
 	}
 
 	router.SortRoutes()

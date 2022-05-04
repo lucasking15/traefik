@@ -116,25 +116,25 @@ func Merge(ctx context.Context, configurations map[string]*dynamic.Configuration
 	for serviceName := range servicesToDelete {
 		logger.WithField(log.ServiceName, serviceName).
 			Errorf("Service defined multiple times with different configurations in %v", services[serviceName])
-		delete(configuration.HTTP.Services, serviceName)
+		//delete(configuration.HTTP.Services, serviceName)
 	}
 
 	for routerName := range routersToDelete {
 		logger.WithField(log.RouterName, routerName).
 			Errorf("Router defined multiple times with different configurations in %v", routers[routerName])
-		delete(configuration.HTTP.Routers, routerName)
+		//delete(configuration.HTTP.Routers, routerName)
 	}
 
 	for serviceName := range servicesTCPToDelete {
 		logger.WithField(log.ServiceName, serviceName).
 			Errorf("Service TCP defined multiple times with different configurations in %v", servicesTCP[serviceName])
-		delete(configuration.TCP.Services, serviceName)
+		//delete(configuration.TCP.Services, serviceName)
 	}
 
 	for routerName := range routersTCPToDelete {
 		logger.WithField(log.RouterName, routerName).
 			Errorf("Router TCP defined multiple times with different configurations in %v", routersTCP[routerName])
-		delete(configuration.TCP.Routers, routerName)
+		//delete(configuration.TCP.Routers, routerName)
 	}
 
 	for serviceName := range servicesUDPToDelete {
@@ -152,7 +152,7 @@ func Merge(ctx context.Context, configurations map[string]*dynamic.Configuration
 	for middlewareName := range middlewaresToDelete {
 		logger.WithField(log.MiddlewareName, middlewareName).
 			Errorf("Middleware defined multiple times with different configurations in %v", middlewares[middlewareName])
-		delete(configuration.HTTP.Middlewares, middlewareName)
+		//delete(configuration.HTTP.Middlewares, middlewareName)
 	}
 
 	return configuration

@@ -158,6 +158,7 @@ func NewTCPEntryPoint(ctx context.Context, configuration *static.EntryPoint) (*T
 }
 
 // Start starts the TCP server.
+// 核心.根据应用层协议做分发.
 func (e *TCPEntryPoint) Start(ctx context.Context) {
 	logger := log.FromContext(ctx)
 	logger.Debugf("Start TCP Server")
@@ -493,6 +494,7 @@ func createHTTPServer(ctx context.Context, ln net.Listener, configuration *stati
 	}
 
 	listener := newHTTPForwarder(ln)
+	// run http server
 	go func() {
 		err := serverHTTP.Serve(listener)
 		if err != nil {
